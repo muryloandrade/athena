@@ -1,34 +1,22 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
-import { Login } from './Pages/Login';
+/* eslint-disable react-hooks/rules-of-hooks */
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { CustomerProvider } from './common/firebase/AuthContext';
+import PrivateRoute from './common/firebase/privateRoute';
 import { Home } from './Pages/Home';
-import { useCustomerProvider } from './common/firebase/AuthContext';
+import { Login } from './Pages/Login';
 
-
-const { user } = useCustomerProvider();
-const navigate = useNavigate();
-const routerPrivate = () => {
-    if (user) {
-        navigate("/home");
-    } else {
-        navigate("/");
-    }
-
-
-export default function AppRoutes = () => {
-
-    return(
-        <Router>
-            <Routes>
-                <Route path="/" element={<Login />} />
-            </Routes>
-            <routerPrivate>
+export default function App() {
+    return (
+        <CustomerProvider>
+            <BrowserRouter>
                 <Routes>
-                    <Route path="/home" element={<Home />} />
+                    <Route path="/home" element={<PrivateRoute><Home /></PrivateRoute>} />
+                    <Route path="/" element={<Login />} />
                 </Routes>
-            </routerPrivate>
-        </Router>
+            </BrowserRouter>
+        </CustomerProvider>
     );
-
 }
+
+
 

@@ -1,6 +1,6 @@
 import axios from "axios";
-import { signInWithEmailAndPassword } from "firebase/auth"
-import { createContext, useContext, useState } from "react";
+import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { auth } from "./firebaseConfig";
 
 type CustomerContextData = {
@@ -11,18 +11,19 @@ type CustomerContextData = {
     setEmail: (email: string) => void;
     setUser: (user: boolean) => void;
     setPassword: (password: string) => void;
+    SignOut: () => Promise<void>;
 }
 
 export const CustomerContext = createContext<CustomerContextData>({} as CustomerContextData);
 
-type IProps = { children: React.ReactNode };
+type IProps = { children: React.ReactNode  };
 
 export const CustomerProvider: React.FC<IProps> = ({ children }) => {
-
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [user, setUser] = useState({});
-    const Auth = async (email: string, password: string) => {
+    const SignOut = useCallback(() => signOut(auth), []);
+    const Auth = async (email: string, password: string) => {    
         try{
             const usr = await signInWithEmailAndPassword(auth, email, password);
             const token = (await usr.user.getIdTokenResult()).token;
@@ -40,11 +41,19 @@ export const CustomerProvider: React.FC<IProps> = ({ children }) => {
         catch(error){
             console.log(error);
         }
-    }
+    };
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (currentUser:any) => {
+          setUser(currentUser);
+        });
+        return () => {
+          unsubscribe();
+        };
+      }, []);
     
     return (
 
-        <CustomerContext.Provider value={{ user, email, password, setEmail, setUser, setPassword, Auth }}>
+        <CustomerContext.Provider value={{ user, email, password, setEmail, setUser, setPassword, Auth, SignOut }}>
             {children}
         </CustomerContext.Provider>
     )
