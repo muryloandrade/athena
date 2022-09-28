@@ -1,5 +1,6 @@
 import { onAuthStateChanged } from "@firebase/auth";
 import { useCallback, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useCustomerProvider } from "../../common/firebase/AuthContext";
 import { auth } from "../../common/firebase/firebaseConfig";
 import "./style.scss";
@@ -8,8 +9,7 @@ import "./style.scss";
 export function Login() {
 
     const { email, password, setEmail, setPassword, setUser, Auth } = useCustomerProvider();
-
-
+    const navigate = useNavigate();
     useEffect(() => {
         const AuthCheck = onAuthStateChanged(auth, (user) => {
           if (user) {
@@ -22,7 +22,8 @@ export function Login() {
     const Login = useCallback((e:any) => {
         e.preventDefault();
         Auth(email, password);
-    }, [Auth, email, password]);
+        navigate("/home");
+    }, [Auth, email, password,navigate]);
     return (
 
 
